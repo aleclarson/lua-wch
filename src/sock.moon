@@ -2,12 +2,15 @@ Promise = require 'cqueues.promise'
 events = require 'wch.events'
 quest = require 'quest'
 uuid = require 'uuid'
+rpc = require 'json-rpc'
 cq = require 'cqueues'
 
 {:JSON} = require 'quest.inject'
 {:EPIPE} = require 'cqueues.errno'
 -- {:ENOENT, :ECONNREFUSED} = require 'cqueues.errno'
 -- {:opendir, :CREATE} = require 'cqueues.notify'
+
+rpc.JSON = JSON
 
 HOME = os.getenv 'HOME'
 WCH_DIR = HOME..'/.wch'
@@ -39,9 +42,7 @@ connect = ->
   sock.state = 'connected'
 
   stream.queue = cq.running!
-  stream\on 'data', (event) ->
-    name, args = event\match '^([^\n]+)\n(.+)\n\n$'
-    events.emit name, JSON.decode args
+  stream\on 'data', rpc.decoder(events.emit)
 
   -- TODO: auto-reconnect if not closed by user
   -- TODO: abort reconnect if closed by user
