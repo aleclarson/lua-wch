@@ -2,15 +2,17 @@ local Promise = require('cqueues.promise')
 local events = require('wch.events')
 local quest = require('quest')
 local uuid = require('uuid')
+local rpc = require('json-rpc')
 local cq = require('cqueues')
 local JSON
 JSON = require('quest.inject').JSON
 local EPIPE
 EPIPE = require('cqueues.errno').EPIPE
+rpc.JSON = JSON
 local HOME = os.getenv('HOME')
 local WCH_DIR = HOME .. '/.wch'
 local sock = quest.sock(WCH_DIR .. '/server.sock')
-local clientId = uuid()
+local clientId = tostring(uuid())
 local connected = nil
 local connect
 connect = function()
@@ -32,10 +34,7 @@ connect = function()
   sock.id = clientId
   sock.state = 'connected'
   stream.queue = cq.running()
-  stream:on('data', function(event)
-    local name, args = event:match('^([^\n]+)\n(.+)\n\n$')
-    return events.emit(name, JSON.decode(args))
-  end)
+  stream:on('data', rpc.decoder(events.emit))
   stream:on('end', function()
     connected = nil
     sock.state = 'closed'

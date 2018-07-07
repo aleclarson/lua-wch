@@ -1,7 +1,13 @@
 local Emitter = require('emitter')
 local events = require('wch.events')
 local sock = require('wch.sock')
-local cq = require('cqueues')
+local resolve
+resolve = function(path)
+  if path:sub(1, 1) ~= '/' then
+    return os.getenv('PWD') .. '/' .. path
+  end
+  return path
+end
 local WatchStream
 do
   local _class_0
@@ -12,19 +18,16 @@ do
       local req = sock:request('POST', '/watch', {
         ['x-client-id'] = sock.id
       })
-      print(req.headers:dump())
-      print('starting stream...')
-      local res, err = req:send({
-        root = self.root,
-        opts = self.opts
+      local res, err, eno = req:send({
+        dir = self.dir,
+        query = self.query
       })
-      if err ~= nil then
+      if err then
         error(err)
       end
-      print(res.headers:dump())
-      print('stream started!')
+      assert(res.ok)
       res, err = res:json()
-      if err ~= nil then
+      if err then
         error(err)
       end
       events.watch(res.id, self)
@@ -37,10 +40,10 @@ do
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
   _class_0 = setmetatable({
-    __init = function(self, root, opts)
+    __init = function(self, dir, query)
       _class_0.__parent.__init(self)
-      self.root = root
-      self.opts = opts
+      self.dir = resolve(dir)
+      self.query = query
     end,
     __base = _base_0,
     __name = "WatchStream",
@@ -71,8 +74,8 @@ do
 end
 local wch = { }
 wch.on = events.on
-wch.stream = function(root, opts)
-  local stream = WatchStream(root, opts)
+wch.stream = function(dir, query)
+  local stream = WatchStream(dir, query)
   return stream:start()
 end
 return wch
