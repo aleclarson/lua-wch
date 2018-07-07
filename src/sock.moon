@@ -13,7 +13,7 @@ HOME = os.getenv 'HOME'
 WCH_DIR = HOME..'/.wch'
 sock = quest.sock WCH_DIR..'/server.sock'
 
-clientId = uuid!
+clientId = tostring uuid!
 connected = nil  -- connect promise
 
 connect = ->
@@ -74,51 +74,3 @@ sock.close = ->
   error 'not yet implemented'
 
 return sock
-
-
---
--- let retries = 0, retryId
--- function reconnect(resolve, reject) {
---   if (fs.exists(SOCK_PATH)) {
---     console.log('sock.retry:', retries)
---     let fuzz = 1.25 - 0.5 * Math.random()
---     let delay = fuzz * 300 * Math.pow(2.2, ++retries)
---     retryId = setTimeout(async () => {
---       retryId = null
---       try {
---         await new Promise(connect)
---         retries = 0
---         resolve()
---       } catch(err) {
---         if (stream) {
---           reconnect(resolve, reject)
---         } else { // Closed by user
---           retries = 0
---           reject(err)
---         }
---       }
---     }, delay)
---   } else {
---     console.log('waiting for server...')
---     watcher = fs.watch(WCH_DIR, (evt, file) => {
---       if (file == SOCK_NAME) {
---         watcher.close()
---         watcher = null
---         reconnect(resolve, reject)
---       }
---     })
---     let {close} = watcher
---     watcher.close = function() {
---       close.apply(this, arguments)
---       if (!stream) { // Closed by user
---         reject(CloseError())
---       }
---     }
---   }
--- }
---
--- function CloseError() {
---   let err = Error('Closed by user')
---   err.code = 'ECONNRESET'
---   return err
--- }

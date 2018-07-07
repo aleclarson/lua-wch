@@ -1,7 +1,6 @@
 Emitter = require 'emitter'
 events = require 'wch.events'
 sock = require 'wch.sock'
-cq = require 'cqueues'
 
 resolve = (path) ->
   if path\sub(1, 1) ~= '/'
@@ -20,17 +19,12 @@ class WatchStream extends Emitter
     req = sock\request 'POST', '/watch',
       'x-client-id': sock.id
 
-    print req.headers\dump!
+    res, err, eno = req\send {root: @root, opts: @opts}
+    error err if err
+    assert res.ok
 
-    print 'starting stream...'
-    res, err = req\send {root: @root, opts: @opts}
-    error err if err ~= nil
-
-    print res.headers\dump!
-
-    print 'stream started!'
     res, err = res\json!
-    error err if err ~= nil
+    error err if err
 
     events.watch res.id, self
     return self
