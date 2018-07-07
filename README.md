@@ -1,6 +1,8 @@
 # wch v0.0.1
 
-Lua client for [wch](https://github.com/aleclarson/wch).
+Lua client for the [wch daemon](https://github.com/aleclarson/wchd)
+
+Compatible with **wchd v0.7.0+**
 
 ```lua
 local wch = require('wch')
