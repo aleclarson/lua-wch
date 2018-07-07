@@ -3,10 +3,15 @@ events = require 'wch.events'
 sock = require 'wch.sock'
 cq = require 'cqueues'
 
+resolve = (path) ->
+  if path\sub(1, 1) ~= '/'
+    return os.getenv('PWD')..'/'..path
+  return path
+
 class WatchStream extends Emitter
   new: (root, opts) =>
     super!
-    @root = root
+    @root = resolve root
     @opts = opts
 
   start: =>
