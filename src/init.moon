@@ -8,10 +8,10 @@ resolve = (path) ->
   return path
 
 class WatchStream extends Emitter
-  new: (root, opts) =>
+  new: (dir, query) =>
     super!
-    @root = resolve root
-    @opts = opts
+    @dir = resolve dir
+    @query = query
 
   start: =>
     sock\connect!\get!
@@ -19,7 +19,7 @@ class WatchStream extends Emitter
     req = sock\request 'POST', '/watch',
       'x-client-id': sock.id
 
-    res, err, eno = req\send {root: @root, opts: @opts}
+    res, err, eno = req\send {dir: @dir, query: @query}
     error err if err
     assert res.ok
 
@@ -40,8 +40,8 @@ wch = {}
 
 wch.on = events.on
 
-wch.stream = (root, opts) ->
-  stream = WatchStream root, opts
+wch.stream = (dir, query) ->
+  stream = WatchStream dir, query
   return stream\start!
 
 return wch
