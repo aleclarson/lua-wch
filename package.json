@@ -1,0 +1,12 @@
+{
+  "name": "lua-wch",
+  "version": "0.0.1",
+  "main": "wch/init.lua",
+  "files": [
+    "wch/",
+    "*.rockspec"
+  ],
+  "devDependencies": {
+    "wch-moon": "^0.0.1"
+  }
+}
